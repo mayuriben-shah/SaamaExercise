@@ -1,0 +1,52 @@
+SQL :
+CREATE TABLE customer (customer_id varchar(5) primary key,customer_name varchar(50),gender varchar(5),age varchar(5));
+CREATE TABLE city(city_id varchar(5) primary key,city_name varchar(50),expence int);
+CREATE TABLE visit(customer_id varchar(5) references customer(customer_id),
+                    city_id_visited varchar(5) references city(city_id),date_visited text);
+
+1.Cities frequently visited?
+
+select v.city_id_visited ,count(*) as visit_count ,c.city_name  from visit v, city c
+where c.city_id = v.city_id_visited 
+group by v.city_id_visited,c.city_id  
+order by visit_count desc limit 1
+
+2.Customers visited more than 1 city?
+
+select count(*) as visit_customer ,c.customer_name  from visit v, customer c 
+where c.customer_id  = v.customer_id 
+group by v.customer_id ,c.customer_id  
+having  count(*) > 1 
+
+3.Cities visited breakdown by gender?
+
+select c.customer_name ,c.gender ,c2.city_name  from customer c ,visit v ,city c2 
+where v.customer_id  = c.customer_id and v.city_id_visited = c2.city_id 
+order by c.gender 
+
+4.List the city names that are not visited by every customer and order them by the expense budget in ascending order?
+
+select * from city where city_id  not in (select city_id_visited from visit v) order by expence
+
+5.Visit/travel Percentage for every customer?
+
+with t1 as
+(select customer_id ,count(*) as tv from visit  group by customer_id)
+select customer_id ,tv , (0.0+tv)/(select count(*) as tc from customer c) * 100 as per
+from t1
+
+6. Total expense incurred by customers on their visits?
+
+select sum(c.expence),c2.customer_name  from city c, visit v, customer c2 
+where c.city_id  = v.city_id_visited  and c2.customer_id = v.customer_id 
+group by v.customer_id ,c2.customer_name 
+
+7.list the Customer details along with the city they first visited and the date of visit?
+
+select * from (select c2.customer_name ,v.date_visited,c.city_name  from  visit v, customer c2 ,city c
+where v.customer_id =  c2.customer_id  and  v.city_id_visited = c.city_id  
+group by c2.customer_name ,v.date_visited ,c.city_name )as ab 
+where ab.date_visited in (select min(v.date_visited) from visit v group by v.customer_id)
+
+
+
