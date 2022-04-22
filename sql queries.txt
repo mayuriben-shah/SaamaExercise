@@ -35,6 +35,10 @@ with t1 as
 select customer_id ,tv , (0.0+tv)/(select count(*) as tc from customer c) * 100 as per
 from t1
 
+1002	1	25.00000000000000000000
+1004	1	25.00000000000000000000
+1001	2	50.00000000000000000000
+
 6. Total expense incurred by customers on their visits?
 
 select sum(c.expence),c2.customer_name  from city c, visit v, customer c2 
